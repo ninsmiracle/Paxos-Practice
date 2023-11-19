@@ -14,7 +14,7 @@ type Acceptor struct {
 	//服务器id
 	id int
 
-	//接受者承诺的提案编号，如果为0，说明接受者没有收到过任何prepare消息
+	//接受者(一阶段)承诺的提案编号，如果为0，说明接受者没有收到过任何prepare消息
 	minProposal int
 	//接受者已接受的提案编号，如果为0，则表示没有接受任何提案
 	acceptedNumber int
@@ -48,7 +48,7 @@ func (a *Acceptor)Accept(args *MsgArgs,reply *MsgReply) error{
 		a.acceptedValue = args.Value
 		reply.Ok = true
 
-		//发给全部的学习者(其实就是副本)
+		//一旦接受提案，就广播发给全部的学习者(其实就是副本)
 		for _,lid := range a.learners{
 			go func(learner int) {
 				addr  := fmt.Sprintf("127.0.0.1:%d",learner)

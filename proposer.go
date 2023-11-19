@@ -10,11 +10,11 @@ type Proposer struct {
 	//ballot编号
 	number int
 	//接受者id
-	acceptor []int
+	acceptors []int
 }
 
 func (p *Proposer)majority() int{
-	return len(p.acceptor) / 2 + 1
+	return len(p.acceptors) / 2 + 1
 }
 
 //提案编号(轮次，服务器id)
@@ -30,7 +30,7 @@ func (p *Proposer) propose(v interface{}) interface{} {
 	//第一阶段
 	prepareCount := 0
 	maxNumber := 0
-	for _,aid := range p.acceptor{
+	for _,aid := range p.acceptors{
 		args := MsgArgs{
 			NUmber: p.number,
 			From: p.id,
@@ -39,10 +39,12 @@ func (p *Proposer) propose(v interface{}) interface{} {
 
 		//给accept发请求
 		reply := new(MsgReply)
+		//go的rpc call  name这个参数指定响应函数
 		err := call(fmt.Sprintf("127.0.0.1:%d",aid),"Acceptor.Prepare",args,reply)
 		if !err{
 			continue
 		}
+
 
 		if reply.Ok{
 			//收到的回复数量，计数
@@ -62,7 +64,7 @@ func (p *Proposer) propose(v interface{}) interface{} {
 
 	acceptCount := 0
 	if  prepareCount >= p.majority(){
-		for _,aid := range p.acceptor{
+		for _,aid := range p.acceptors{
 			args := MsgArgs{
 				NUmber: p.number,
 				Value: v,

@@ -44,6 +44,7 @@ func (l *Learner) chosen() interface{}{
 		}
 	}
 
+	//某个提案被接收的count
 	for n,count := range acceptCounts{
 		if count >= l.majority(){
 			return acceptMsg[n].Value
@@ -75,6 +76,22 @@ func (l *Learner) server(id int){
 		}
 	}()
 
+}
+
+func newLearner(id int,acceptorIds []int)*Learner{
+	learner := &Learner{
+		id: id,
+		acceptedMsg: make(map[int]MsgArgs),
+	}
+
+	for _,aid := range acceptorIds{
+		learner.acceptedMsg[aid] = MsgArgs{
+			NUmber: 0,
+			Value: nil,
+		}
+	}
+	learner.server(id)
+	return learner
 }
 
 func(l *Learner) close(){
